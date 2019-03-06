@@ -59,19 +59,21 @@ class PerkvilleExecutor(TapExecutor):
             'params': self.build_initial_params(stream, last_updated),
             'run': True
         }
-        last_updated = 1551824349
 
         LOGGER.info("Extracting %s since %s" % (stream, last_updated))
 
 
         while request_config['run']:
 
+            LOGGER.info("Params: %s" % (request_config['params']))
             res = self.client.make_request(request_config)
 
             if res.status_code != 200:
                 raise AttributeError('Received status code {}'.format(res.status_code))
 
             records = res.json()['objects']
+
+            LOGGER.info('Received {} records'.format(len(records)))
 
             if self.should_write(records, stream, last_updated):
                 transform_write_and_count(stream, records)
@@ -89,7 +91,6 @@ class PerkvilleExecutor(TapExecutor):
                 stream
             )
 
-            LOGGER.info("Offset: %s" % (request_config['params']['offset']))
 
         return last_updated
 
