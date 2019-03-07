@@ -1,7 +1,9 @@
 from tap_kit import main_method
 from .executor import PerkvilleExecutor
-from tap_kit import BaseClient
+from .client import BaseClient
 from .users import UsersStream
+from .connections import ConnectionsStream
+
 
 REQUIRED_CONFIG_KEYS = [
 	"start_date",
@@ -12,7 +14,8 @@ REQUIRED_CONFIG_KEYS = [
 ]
 
 STREAMS = [
-    UsersStream,
+	UsersStream,
+    ConnectionsStream,
 ]
 
 def main():

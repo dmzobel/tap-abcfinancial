@@ -23,28 +23,10 @@ class PerkvilleExecutor(TapExecutor):
         """
         super(PerkvilleExecutor, self).__init__(streams, args, client)
 
-        # login_request_config = {
-        #     'url': LOGIN,
-        #     'params': {
-        #         'grant_type': 'refresh_token',
-        #         'client_id': self.client.config['client_id'],
-        #         'client_secret': self.client.config['client_secret'],
-        #         'refresh_token': self.client.config['refresh_token'],
-        #     },
-        #     'headers': {}
-        # }
-
-        # response_dict = self.client.make_request(
-        #     login_request_config
-        # ).json()
         self.replication_key_format = 'timestamp'
         self.access_token = self.client.config['access_token']
         self.url = 'https://api.perkville.com/v2/'
-
-        # self.config['execution_start_time_ts'] = pendulum.from_timestamp(
-        #     time.time(),
-        #     tz='local'
-        # )
+        self.total_contacts = 0
 
     def call_incremental_stream(self, stream):
         """
@@ -73,7 +55,9 @@ class PerkvilleExecutor(TapExecutor):
 
             records = res.json()['objects']
 
-            LOGGER.info('Received {} records'.format(len(records)))
+            self.total_contacts += len(records)
+            LOGGER.info('Total Records is {}'.format(self.total_contacts))
+
 
             if self.should_write(records, stream, last_updated):
                 transform_write_and_count(stream, records)
@@ -97,7 +81,11 @@ class PerkvilleExecutor(TapExecutor):
     def get_lastest_update(self, records, last_updated):
         max_updated = last_updated
         for rec in records:
-            date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%d %H:%M:%S')
+            utc_timestamp = rec['last_mod_dt'][0:19]
+            if 'T' in utc_timestamp:
+                date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%dT%H:%M:%S')
+            else:
+                date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%d %H:%M:%S')
             max_updated = max(max_updated, date.timestamp())
         return int(max_updated)
 
@@ -109,13 +97,8 @@ class PerkvilleExecutor(TapExecutor):
         }
 
     def format_last_modified(self, last_updated):
-
         date = datetime.datetime.fromtimestamp(last_updated, tz=pytz.UTC)
-        last_mod = '{} {}:{}Z'.format(
-            date.strftime('%Y-%m-%d'),
-            date.strftime('%H'),
-            date.strftime('%M')
-        )
+        last_mod = '{}Z'.format(date.strftime('%Y-%m-%d %H:%M'))
         return last_mod
     
     def update_for_next_call(self, res, request_config, stream):
