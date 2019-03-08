@@ -1,6 +1,7 @@
 import singer
 import requests
 import backoff
+import time
 
 LOGGER = singer.get_logger()
 
@@ -32,7 +33,7 @@ class BaseClient:
     @backoff.on_exception(backoff.expo,
                           RateLimitException,
                           max_tries=10,
-                          factor=2)
+                          factor=5)
     def make_request(self, request_config, body=None, method='GET'):
         LOGGER.info("Making {} request to {}".format(
             method, request_config['url']))
@@ -42,7 +43,7 @@ class BaseClient:
 
         if response.status_code in [429, 503, 504]:
             raise RateLimitException()
-
+       
         response.raise_for_status()
 
         return response
