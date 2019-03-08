@@ -115,7 +115,10 @@ class PerkvilleExecutor(TapExecutor):
         elif last_updated >= 1433808000:
             # 1 month windows
             high_window = last_updated + (30 * 24 * 60 * 60)
-        
+
+        if high_window > int(time.time()):
+            high_window = int(time.time())
+
         return low_window, high_window
 
     def format_last_modified(self, last_updated):
