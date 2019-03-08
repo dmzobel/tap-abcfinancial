@@ -95,6 +95,8 @@ class PerkvilleExecutor(TapExecutor):
             date = datetime.datetime.strptime(last_updated[0:19], '%Y-%m-%dT%H:%M:%S')
             last_updated = int(date.timestamp())
 
+        LOGGER.info('Last Updated is: {}'.format(last_updated))
+
         low_window = last_updated
         if last_updated == 0:
             high_window = 1293840000
