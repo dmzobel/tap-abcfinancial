@@ -90,6 +90,11 @@ class PerkvilleExecutor(TapExecutor):
         return int(max_updated)
 
     def build_initial_params(self, stream, last_updated=None):
+
+        if type(last_updated) == str:
+            date = datetime.datetime.strptime(last_updated[0:19], '%Y-%m-%dT%H:%M:%S')
+            last_updated = int(date.timestamp())
+
         low_window = last_updated
         if last_updated == 0:
             high_window = 1293840000
