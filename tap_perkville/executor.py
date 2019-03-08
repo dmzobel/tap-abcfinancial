@@ -62,10 +62,10 @@ class PerkvilleExecutor(TapExecutor):
             if self.should_write(records, stream, last_updated):
                 transform_write_and_count(stream, records)
             
-            last_updated = self.get_lastest_update(
-                records,
-                last_updated
-            )
+            # last_updated = self.get_lastest_update(
+            #     records,
+            #     last_updated
+            # )
 
             stream.update_bookmark(last_updated)
 
@@ -75,22 +75,32 @@ class PerkvilleExecutor(TapExecutor):
                 stream
             )
 
+        return self.get_low_and_high_window(last_updated)[1]
 
-        return last_updated
-
-    def get_lastest_update(self, records, last_updated):
-        max_updated = last_updated
-        for rec in records:
-            utc_timestamp = rec['last_mod_dt'][0:19]
-            if 'T' in utc_timestamp:
-                date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%dT%H:%M:%S')
-            else:
-                date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%d %H:%M:%S')
-            max_updated = max(max_updated, date.timestamp())
-        return int(max_updated)
+    # def get_lastest_update(self, records, last_updated):
+    #     max_updated = last_updated
+    #     for rec in records:
+    #         utc_timestamp = rec['last_mod_dt'][0:19]
+    #         if 'T' in utc_timestamp:
+    #             date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%dT%H:%M:%S')
+    #         else:
+    #             date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%d %H:%M:%S')
+    #         max_updated = max(max_updated, date.timestamp())
+    #     return int(max_updated)
 
     def build_initial_params(self, stream, last_updated=None):
 
+        low_window, high_window = self.get_low_and_high_window(last_updated)
+
+        LOGGER.info('Low Window: {}, High Window: {}'.format(low_window, high_window))
+        return {
+            'last_mod_dt__gte': self.format_last_modified(low_window),
+            'limit': 1000,
+            'offset': 0,
+            'last_mod_dt__lt': self.format_last_modified(high_window)
+        }
+    
+    def get_low_and_high_window(self, last_updated):
         if type(last_updated) == str:
             date = datetime.datetime.strptime(last_updated[0:19], '%Y-%m-%dT%H:%M:%S')
             last_updated = int(date.timestamp())
@@ -105,14 +115,8 @@ class PerkvilleExecutor(TapExecutor):
         elif last_updated >= 1433808000:
             # 1 month windows
             high_window = last_updated + (30 * 24 * 60 * 60)
-
-        LOGGER.info('Low Window: {}, High Window: {}'.format(low_window, high_window))
-        return {
-            'last_mod_dt__gte': self.format_last_modified(low_window),
-            'limit': 1000,
-            'offset': 0,
-            'last_mod_dt__lt': self.format_last_modified(high_window)
-        }
+        
+        return low_window, high_window
 
     def format_last_modified(self, last_updated):
         date = datetime.datetime.fromtimestamp(last_updated, tz=pytz.UTC)
