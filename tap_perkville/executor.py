@@ -96,9 +96,8 @@ class PerkvilleExecutor(TapExecutor):
             last_updated = int(date.timestamp())
 
         LOGGER.info('Last Updated is: {}'.format(last_updated))
-
         low_window = last_updated
-        if last_updated == 0:
+        if last_updated >= 0 and < 1293840000:
             high_window = 1293840000
         elif last_updated >= 1293840000 and last_updated < 1433808000:
             # 3 month windows
