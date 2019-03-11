@@ -75,18 +75,7 @@ class PerkvilleExecutor(TapExecutor):
                 stream
             )
 
-        return self.get_low_and_high_window(last_updated)[1]
-
-    # def get_lastest_update(self, records, last_updated):
-    #     max_updated = last_updated
-    #     for rec in records:
-    #         utc_timestamp = rec['last_mod_dt'][0:19]
-    #         if 'T' in utc_timestamp:
-    #             date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%dT%H:%M:%S')
-    #         else:
-    #             date =  datetime.datetime.strptime(rec['last_mod_dt'][0:19], '%Y-%m-%d %H:%M:%S')
-    #         max_updated = max(max_updated, date.timestamp())
-    #     return int(max_updated)
+        return request_config['params']['last_mod_dt__lt']
 
     def build_initial_params(self, stream, last_updated=None):
 
