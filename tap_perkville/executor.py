@@ -75,6 +75,7 @@ class PerkvilleExecutor(TapExecutor):
                 stream
             )
 
+        LOGGER.info('setting last updated to {}'.format(request_config['params']['last_mod_dt__lt']))
         return request_config['params']['last_mod_dt__lt']
 
     def build_initial_params(self, stream, last_updated=None):
@@ -90,10 +91,12 @@ class PerkvilleExecutor(TapExecutor):
         }
     
     def get_low_and_high_window(self, last_updated):
-        if type(last_updated) == str:
-            date = datetime.datetime.strptime(last_updated[0:19], '%Y-%m-%dT%H:%M:%S')
-            last_updated = int(date.timestamp())
+        last_updated = '2010-01-01T00:00:00+00:00'
 
+        if type(last_updated) == str:
+            date = datetime.datetime.strptime(last_updated, '%Y-%m-%dT%H:%M:%S%z')
+            last_updated = int(date.timestamp())
+        
         LOGGER.info('Last Updated is: {}'.format(last_updated))
         low_window = last_updated
         if last_updated >= 0 and last_updated < 1293840000:

@@ -7,8 +7,6 @@ from .connections import ConnectionsStream
 
 REQUIRED_CONFIG_KEYS = [
 	"start_date",
-	"client_id",
-	"client_secret",
 	"refresh_token",
 	"access_token",
 ]
