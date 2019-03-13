@@ -91,7 +91,6 @@ class PerkvilleExecutor(TapExecutor):
         }
     
     def get_low_and_high_window(self, last_updated):
-        last_updated = '2010-01-01T00:00:00+00:00'
 
         if type(last_updated) == str:
             date = datetime.datetime.strptime(last_updated, '%Y-%m-%dT%H:%M:%S%z')
