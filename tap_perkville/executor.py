@@ -43,6 +43,7 @@ class PerkvilleExecutor(TapExecutor):
         }
 
         LOGGER.info("Extracting %s since %s" % (stream, last_updated))
+        self.total_contacts = 0
 
 
         while request_config['run']:
