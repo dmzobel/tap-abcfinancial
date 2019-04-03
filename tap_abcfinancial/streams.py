@@ -15,8 +15,9 @@ class MembersStream(Stream):
     )
 
     schema = {
-      "properties": {
-      }
+        "properties": {
+            # TODO
+        }
     }
 
 
@@ -32,8 +33,9 @@ class ProspectsStream(Stream):
     )
 
     schema = {
-      "properties": {
-      }
+        "properties": {
+            # TODO
+        }
     }
 
 
@@ -47,6 +49,7 @@ class ClubsStream(Stream):
     )
 
     schema = {
-      "properties": {
-      }
+        "properties": {
+            # TODO
+        }
     }

@@ -27,7 +27,6 @@ class ABCExecutor(TapExecutor):
         self.url = 'https://api.abcfinancial.com/rest/'
         self.api_key = self.client.config['api_key']
         self.app_id = self.client.config['app_id']
-        self.pagination_type = 'next'  # maybe update?
 
     def call_incremental_stream(self, stream):
         """
@@ -52,18 +51,16 @@ class ABCExecutor(TapExecutor):
                                                                        d=last_updated))
 
             while request_config['run']:
-                LOGGER.info("Params: %s" % (request_config['params']))
                 res = self.client.make_request(request_config)
 
-                if res.status_code != 200:
-                    raise AttributeError(
-                        'Received status code {}'.format(res.status_code))
+                LOGGER.info('Received {n} records on page {i} for club {c}'.format(
+                    n=res.json()['status']['count'],
+                    i=res.json()['request']['page'],
+                    c=club_id
+                ))
+                records = res.json().get(stream.stream, [])
 
-                records = res.json()[stream.stream]
-
-                # why is this necessary, it just returns true?
-                if self.should_write(records, stream, last_updated):
-                    transform_write_and_count(stream, records)
+                transform_write_and_count(stream, records)
 
                 request_config = self.update_for_next_call(
                     res,
@@ -76,6 +73,7 @@ class ABCExecutor(TapExecutor):
         # clubs to have incorrect state.
         LOGGER.info('Setting last updated to {}'.format(now_time))
         stream.update_bookmark(now_time)
+
         return now_time
 
     def call_full_stream(self, stream):
@@ -91,12 +89,18 @@ class ABCExecutor(TapExecutor):
             }
 
             LOGGER.info("Extracting {s} for club {c}".format(s=stream, 
-                                                            c=club_id))
+                                                             c=club_id))
 
             while request_config['run']:
                 res = self.client.make_request(request_config)
 
-                records = res.json()[stream.stream]
+                LOGGER.info('Received {n} records on page {i} for club {c}'.format(
+                    n=res.json()['status']['count'],
+                    i=res.json()['request']['page'],
+                    c=club_id
+                ))
+
+                records = res.json().get(stream.stream, [])
 
                 transform_write_and_count(stream, records)
 
@@ -135,7 +139,7 @@ class ABCExecutor(TapExecutor):
         }
 
     def update_for_next_call(self, res, request_config, stream):
-        if len(res.json()[stream.stream]) == 0:
+        if int(res.json()['status']['count']) == 0:  # must coerce value to a number
             return {
                 "url": self.url,
                 "headers": request_config['headers'],
