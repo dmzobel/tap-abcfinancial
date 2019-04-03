@@ -62,7 +62,7 @@ class ABCExecutor(TapExecutor):
 
                 if stream.stream == 'prospects':
                     # the API does not provide club_id from the prospects endpoint
-                    records = self.hydrate_record_with_club_id(records)
+                    records = self.hydrate_record_with_club_id(records, club_id)
 
                 transform_write_and_count(stream, records)
 
@@ -96,7 +96,7 @@ class ABCExecutor(TapExecutor):
                                                              c=club_id))
 
             while request_config['run']:
-                res = self.client.make_request(request_config, club_id)
+                res = self.client.make_request(request_config)
 
                 LOGGER.info('Received {n} records on page {i} for club {c}'.format(
                     n=res.json()['status']['count'],
