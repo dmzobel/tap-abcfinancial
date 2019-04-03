@@ -1,7 +1,7 @@
 # tap-abcfinancial
 
 Singer tap to extract data from the ABC Financial API, conforming to the Singer
-spec.
+spec: https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md
 
 ABC Financial API: https://abcfinancial.3scale.net/docs
 
