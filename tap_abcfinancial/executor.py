@@ -60,6 +60,10 @@ class ABCExecutor(TapExecutor):
                 ))
                 records = res.json().get(stream.stream, [])
 
+                if stream.stream == 'prospects':
+                    # the API does not provide club_id from the prospects endpoint
+                    records = self.hydrate_record_with_club_id(records)
+
                 transform_write_and_count(stream, records)
 
                 request_config = self.update_for_next_call(
@@ -92,7 +96,7 @@ class ABCExecutor(TapExecutor):
                                                              c=club_id))
 
             while request_config['run']:
-                res = self.client.make_request(request_config)
+                res = self.client.make_request(request_config, club_id)
 
                 LOGGER.info('Received {n} records on page {i} for club {c}'.format(
                     n=res.json()['status']['count'],
@@ -157,3 +161,15 @@ class ABCExecutor(TapExecutor):
     def build_next_params(self, params):
         params['page'] += 1
         return params
+
+    def hydrate_record_with_club_id(self, records, club_id):
+        """
+        Args:
+            records (array [JSON]):
+        Returns:
+            array of records, with the club_id appended to each record
+        """
+        for record in records:
+            record['club_id'] = club_id
+
+        return records
