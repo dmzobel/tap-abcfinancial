@@ -2,13 +2,13 @@
 from setuptools import setup
 
 setup(
-    name="tap-perkville",
+    name="tap-abcfinancial",
     version="0.1.1",
     description="Singer.io tap for extracting data",
     author="Simon Data",
     url="http://simondata.com",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
-    py_modules=["tap_perkville"],
+    py_modules=["tap_abcfinancial"],
     install_requires=[
         "singer-python==5.2.0",
         'requests==2.18.4',
@@ -20,8 +20,8 @@ setup(
     ],
     entry_points="""
     [console_scripts]
-    tap-perkville=tap_perkville:main
+    tap-abcfinancial=tap_abcfinancial:main
     """,
-    packages=["tap_perkville"],
+    packages=["tap_abcfinancial"],
     include_package_data=True,
 )
