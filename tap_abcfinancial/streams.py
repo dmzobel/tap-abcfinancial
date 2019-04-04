@@ -70,7 +70,7 @@ class MembersStream(Stream):
                         "type": ["null", "string"]
                     },
                     "isActive": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     },
                     "memberStatus": {
                         "type": ["null", "string"]
@@ -79,10 +79,10 @@ class MembersStream(Stream):
                         "type": ["null", "string"]
                     },
                     "isConvertedProspect": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     },
                     "hasPhoto": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     },
                     "memberStatusReason": {
                         "type": ["null", "string"]
@@ -115,10 +115,10 @@ class MembersStream(Stream):
                         "type": ["null", "string"]
                     },
                     "isPrimaryMember": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     },
                     "isNonMember": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     },
                     "ordinal": {
                         "type": ["null", "string"]
@@ -157,7 +157,7 @@ class MembersStream(Stream):
                         "type": ["null", "string"]
                     },
                     "isPastDue": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     },
                     "renewalType": {
                         "type": ["null", "string"]
@@ -281,10 +281,10 @@ class ProspectsStream(Stream):
                         "type": ["null", "string"]
                     },
                     "isActive": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     },
                     "hasPhoto": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     },
                     "firstCheckInTimestamp": {
                         "type": ["null", "string"],
@@ -413,7 +413,7 @@ class ClubsStream(Stream):
                     "minors": {
                         "properties": {
                             "allowMinors": {
-                                "type": ["null", "boolean"]
+                                "type": ["null", "string"]
                             },
                             "minorAge": {
                                 "type": ["null", "string"]
@@ -427,7 +427,7 @@ class ClubsStream(Stream):
                     "ccNames": {
                         "properties": {
                             "requireCCNameMatch": {
-                                "type": ["null", "boolean"]
+                                "type": ["null", "string"]
                             },
                             "differentCcNamesDisclaimer": {
                                 "type": ["null", "string"]
@@ -436,7 +436,7 @@ class ClubsStream(Stream):
                         "type": ["null", "object"]
                     },
                     "showFees": {
-                        "type": ["null", "boolean"]
+                        "type": ["null", "string"]
                     }
                 },
                 "type": ["null", "object"]
