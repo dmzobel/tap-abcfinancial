@@ -417,7 +417,7 @@ class ClubsStream(Stream):
                     },
                     "differentCcNamesDisclaimer": {
                         "type": ["null", "string"]
-                    }
+                    },
                     "type": ["null", "struct"]
                 },
                 "showFees": {
