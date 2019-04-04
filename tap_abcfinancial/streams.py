@@ -105,7 +105,7 @@ class MembersStream(Stream):
                     "type": ["null", "string"],
                     "format": "date-time"
                 },
-                "type": ["null", "struct"]
+                "type": ["null", "object"]
             },
             "agreement": {
                 "agreementNumber": {
@@ -218,9 +218,9 @@ class MembersStream(Stream):
                     "lastName": {
                         "type": ["null", "string"]
                     },
-                    "type": ["null", "struct"]
+                    "type": ["null", "object"]
                 },
-                "type": ["null", "struct"]
+                "type": ["null", "object"]
             }
         }
     }
@@ -291,7 +291,7 @@ class ProspectsStream(Stream):
                     "type": ["null", "string"],
                     "format": "date-time"
                 },
-                "type": ["null", "struct"]
+                "type": ["null", "object"]
             },
             "agreement": {
                 "referringMemberId": {
@@ -345,7 +345,7 @@ class ProspectsStream(Stream):
                 "visitsUsed": {
                     "type": ["null", "string"]
                 },
-                "type": ["null", "struct"]
+                "type": ["null", "object"]
             },
             "club_id": {
                 "type": ["null", "string"]
@@ -409,7 +409,7 @@ class ClubsStream(Stream):
                     "minorDisclaimer": {
                         "type": ["null", "string"]
                     },
-                    "type": ["null", "struct"]
+                    "type": ["null", "object"]
                 },
                 "ccNames": {
                     "requireCCNameMatch": {
@@ -418,12 +418,12 @@ class ClubsStream(Stream):
                     "differentCcNamesDisclaimer": {
                         "type": ["null", "string"]
                     },
-                    "type": ["null", "struct"]
+                    "type": ["null", "object"]
                 },
                 "showFees": {
                     "type": ["null", "boolean"]
                 },
-                "type": ["null", "struct"]
+                "type": ["null", "object"]
             },
             "billingCountry": {
                 "type": ["null", "string"]
