@@ -10,24 +10,53 @@ class ABCStream(Stream):
     methods to track state for each individual ABC Financial club
     """
 
+    def __init__(self, config=None, state=None, catalog=None):
+        super(ABCStream, self).__init__(config, state, catalog)
+
+        self.config = config
+        self.state = state
+        self.catalog = catalog
+        self.api_path = self.api_path if self.api_path else self.stream
+
+        self.build_params()
+
     def write_bookmark(self, state, tap_stream_id, club_id, key, val):
+        state = self.ensure_bookmark_path(state, ['bookmarks',
+                                                  tap_stream_id,
+                                                  club_id])
         state['bookmarks'][tap_stream_id][club_id][key] = val
+        return state
+
+    @staticmethod
+    def ensure_bookmark_path(state, path):
+        """
+        :param state: state object
+        :param path: array of keys to check in state
+        :return: checks for or creates a nested object in which each element
+        of the path array is the parent key of the next element
+        """
+        submap = state
+        for path_component in path:
+            if submap.get(path_component) is None:
+                submap[path_component] = {}
+
+            submap = submap[path_component]
         return state
 
     def get_bookmark(self, club_id):
         key = self.stream_metadata.get('replication-key')
 
         return self.state.get('bookmarks', {})\
-                         .get(self.stream.stream, {})\
+                         .get(self.stream, {})\
                          .get(club_id, {})\
                          .get(key)
 
     def update_bookmark(self, last_updated, club_id):
-        self.write_bookmark(self.state,
-                            self.stream,
-                            club_id,
-                            self.stream_metadata.get('replication_key'),
-                            safe_to_iso8601(last_updated))
+        self.state = self.write_bookmark(self.state,
+                                         self.stream,
+                                         club_id,
+                                         self.stream_metadata.get('replication-key'),
+                                         safe_to_iso8601(last_updated))
 
     def update_start_date_bookmark(self, club_id):
         val = self.get_bookmark(club_id)
@@ -487,6 +516,9 @@ class ClubsStream(ABCStream):
             },
             "thirdPartyPaymentMethods": {
                 "type": ["null", "array"]
+            },
+            "club_id": {
+                "type": ["null", "string"]
             }
         }
     }
