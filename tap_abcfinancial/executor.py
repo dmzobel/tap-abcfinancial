@@ -28,17 +28,32 @@ class ABCExecutor(TapExecutor):
         self.api_key = self.client.config['api_key']
         self.app_id = self.client.config['app_id']
 
+    def sync_stream(self, stream):
+        stream.write_schema()
+        LOGGER.info('stream:')
+        LOGGER.info(stream)
+
+        if stream.is_incremental:
+            stream.set_stream_state(self.state)
+            last_updated, club_id = self.call_incremental_stream(stream)
+            stream.update_bookmark(last_updated, club_id)
+        else:
+            self.call_full_stream(stream)
+
     def call_incremental_stream(self, stream):
         """
         Method to call all incremental synced streams
         """
-        last_updated = format_last_updated_for_request(
-            stream.update_and_return_bookmark(), self.replication_key_format
-        )
-        now_time = str(pendulum.now('UTC'))
 
         # need to call each club ID individually
         for club_id in self.client.config['club_ids']:
+
+            last_updated = format_last_updated_for_request(
+                stream.update_and_return_bookmark(),
+                self.replication_key_format
+            )
+            now_time = str(pendulum.now('UTC'))
+
             request_config = {
                 'url': self.generate_api_url(stream, club_id),
                 'headers': self.build_headers(),
@@ -72,13 +87,12 @@ class ABCExecutor(TapExecutor):
                     stream
                 )
 
-        # Must wait for all clubs to finish before updating state.
-        # Otherwise, a failure with one club will cause calls to subsequent 
-        # clubs to have incorrect state.
-        LOGGER.info('Setting last updated to {}'.format(now_time))
-        stream.update_bookmark(now_time)
+            LOGGER.info('Setting last updated for club {} to {}'.format(
+                club_id,
+                now_time
+            ))
 
-        return now_time
+            return now_time, club_id
 
     def call_full_stream(self, stream):
         """

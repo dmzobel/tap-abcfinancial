@@ -1,8 +1,46 @@
 from tap_kit.streams import Stream
+from tap_kit.utils import safe_to_iso8601
 import singer
 
+LOGGER = singer.get_logger()
 
-class MembersStream(Stream):
+
+class ABCStream(Stream):
+    """
+    methods to track state for each individual ABC Financial club
+    """
+
+    def write_bookmark(self, state, tap_stream_id, club_id, key, val):
+        state['bookmarks'][tap_stream_id][club_id][key] = val
+        return state
+
+    def get_bookmark(self, club_id):
+        key = self.stream_metadata.get('replication-key')
+
+        return self.state.get('bookmarks', {})\
+                         .get(self.stream.stream, {})\
+                         .get(club_id, {})\
+                         .get(key)
+
+    def update_bookmark(self, last_updated, club_id):
+        self.write_bookmark(self.state,
+                            self.stream,
+                            club_id,
+                            self.stream_metadata.get('replication_key'),
+                            safe_to_iso8601(last_updated))
+
+    def update_start_date_bookmark(self, club_id):
+        val = self.get_bookmark(club_id)
+        if not val:
+            val = self.config['start_date']
+            self.update_bookmark(val, club_id)
+
+    def update_and_return_bookmark(self, club_id):
+        self.update_start_date_bookmark(club_id)
+        return self.get_bookmark(club_id)
+
+
+class MembersStream(ABCStream):
 
     stream = 'members'
 
@@ -232,7 +270,7 @@ class MembersStream(Stream):
     }
 
 
-class ProspectsStream(Stream):
+class ProspectsStream(ABCStream):
     stream = 'prospects'
 
     meta_fields = dict(
@@ -364,7 +402,7 @@ class ProspectsStream(Stream):
     }
 
 
-class ClubsStream(Stream):
+class ClubsStream(ABCStream):
     stream = 'clubs'
 
     meta_fields = dict(
