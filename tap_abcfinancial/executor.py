@@ -1,13 +1,13 @@
 import singer
 import json
 import pendulum
-import datetime
 
 from tap_kit import TapExecutor
 from tap_kit.utils import timestamp_to_iso8601
 from singer.catalog import Catalog, CatalogEntry
 from tap_kit.utils import (transform_write_and_count,
                            format_last_updated_for_request)
+from .streams import ABCStream
 
 LOGGER = singer.get_logger()
 
@@ -28,17 +28,39 @@ class ABCExecutor(TapExecutor):
         self.api_key = self.client.config['api_key']
         self.app_id = self.client.config['app_id']
 
+    def sync(self):
+
+        self.set_catalog()
+
+        for c in self.selected_catalog:
+            self.sync_stream(
+                ABCStream(config=self.config, state=self.state, catalog=c)
+            )
+
+    def sync_stream(self, stream):
+        stream.write_schema()
+
+        if stream.is_incremental:
+            stream.set_stream_state(self.state)
+            last_updated, club_id = self.call_incremental_stream(stream)
+            stream.update_bookmark(last_updated, club_id)
+        else:
+            self.call_full_stream(stream)
+
     def call_incremental_stream(self, stream):
         """
         Method to call all incremental synced streams
         """
-        last_updated = format_last_updated_for_request(
-            stream.update_and_return_bookmark(), self.replication_key_format
-        )
-        now_time = str(pendulum.now('UTC'))
 
         # need to call each club ID individually
         for club_id in self.client.config['club_ids']:
+
+            last_updated = format_last_updated_for_request(
+                stream.update_and_return_bookmark(club_id),
+                self.replication_key_format
+            )
+            now_time = str(pendulum.now('UTC'))
+
             request_config = {
                 'url': self.generate_api_url(stream, club_id),
                 'headers': self.build_headers(),
@@ -60,8 +82,8 @@ class ABCExecutor(TapExecutor):
                 ))
                 records = res.json().get(stream.stream, [])
 
-                if stream.stream == 'prospects':
-                    # the API does not provide club_id from the prospects endpoint
+                # for endpoints that do not provide club_id
+                if stream.stream in streams_to_hydrate:
                     records = self.hydrate_record_with_club_id(records, club_id)
 
                 transform_write_and_count(stream, records)
@@ -72,13 +94,12 @@ class ABCExecutor(TapExecutor):
                     stream
                 )
 
-        # Must wait for all clubs to finish before updating state.
-        # Otherwise, a failure with one club will cause calls to subsequent 
-        # clubs to have incorrect state.
-        LOGGER.info('Setting last updated to {}'.format(now_time))
-        stream.update_bookmark(now_time)
+            LOGGER.info('Setting last updated for club {} to {}'.format(
+                club_id,
+                now_time
+            ))
 
-        return now_time
+            return now_time, club_id
 
     def call_full_stream(self, stream):
         """
@@ -98,17 +119,33 @@ class ABCExecutor(TapExecutor):
             while request_config['run']:
                 res = self.client.make_request(request_config)
 
-                LOGGER.info('Received {n} records on page {i} for club {c}'.format(
+                LOGGER.info('Received {n} records for club {c}'.format(
                     n=res.json()['status']['count'],
-                    i=res.json()['request']['page'],
                     c=club_id
                 ))
 
-                records = res.json().get(stream.stream, [])
+                if stream.stream == 'clubs':
+                    # there's only 1 record per call, so the key is 'club',
+                    # not 'clubs'
+                    records = res.json().get('club')
+                else:
+                    records = res.json().get(stream.stream, [])
+
+                if not isinstance(records, list):
+                    # subsequent methods are expecting a list
+                    records = [records]
+
+                # for endpoints that do not provide club_id
+                if stream.stream in streams_to_hydrate:
+                    records = self.hydrate_record_with_club_id(records, club_id)
 
                 transform_write_and_count(stream, records)
 
-                request_config = self.update_for_next_call(res, request_config, stream)
+                request_config = self.update_for_next_call(
+                    res,
+                    request_config,
+                    stream
+                )
 
     def generate_api_url(self, stream, club_id):
         return self.url + club_id + '/' + stream.stream
@@ -135,7 +172,7 @@ class ABCExecutor(TapExecutor):
         return datetime
 
     def build_initial_params(self, stream, last_updated, curr_time):
-        date_range = '{l},{c}'.format(l=self.format_last_updated(last_updated),
+        date_range = '{p},{c}'.format(p=self.format_last_updated(last_updated),
                                       c=self.format_last_updated(curr_time))
         return {
             stream.stream_metadata[stream.filter_key]: date_range,
@@ -143,7 +180,7 @@ class ABCExecutor(TapExecutor):
         }
 
     def update_for_next_call(self, res, request_config, stream):
-        if int(res.json()['status']['count']) == 0:  # must coerce value to a number
+        if int(res.json()['status']['count']) in (0,1):
             return {
                 "url": self.url,
                 "headers": request_config['headers'],
@@ -159,7 +196,8 @@ class ABCExecutor(TapExecutor):
             }
 
     def build_next_params(self, params):
-        params['page'] += 1
+        if params.get('page'):
+            params['page'] += 1
         return params
 
     def hydrate_record_with_club_id(self, records, club_id):
@@ -173,3 +211,6 @@ class ABCExecutor(TapExecutor):
             record['club_id'] = club_id
 
         return records
+
+
+streams_to_hydrate = ['prospects', 'clubs']
