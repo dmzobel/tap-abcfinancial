@@ -41,8 +41,7 @@ class ABCExecutor(TapExecutor):
 
         if stream.is_incremental:
             stream.set_stream_state(self.state)
-            last_updated, club_id = self.call_incremental_stream(stream)
-            stream.update_bookmark(last_updated, club_id)
+            self.call_incremental_stream(stream)
         else:
             self.call_full_stream(stream)
 
@@ -53,6 +52,10 @@ class ABCExecutor(TapExecutor):
 
         # need to call each club ID individually
         for club_id in self.client.config['club_ids']:
+            LOGGER.info('stream:')
+            LOGGER.info(stream)
+            LOGGER.info('club_id:')
+            LOGGER.info(club_id)
 
             last_updated = format_last_updated_for_request(
                 stream.update_and_return_bookmark(club_id),
@@ -98,7 +101,7 @@ class ABCExecutor(TapExecutor):
                 now_time
             ))
 
-            return now_time, club_id
+            stream.update_bookmark(now_time, club_id)
 
     def call_full_stream(self, stream):
         """
