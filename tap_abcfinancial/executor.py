@@ -29,7 +29,6 @@ class ABCExecutor(TapExecutor):
         self.app_id = self.client.config['app_id']
 
     def sync(self):
-
         self.set_catalog()
 
         for c in self.selected_catalog:
@@ -148,7 +147,9 @@ class ABCExecutor(TapExecutor):
                 )
 
     def generate_api_url(self, stream, club_id):
-        return self.url + club_id + '/' + stream.stream
+        url = self.url + club_id + '/' + stream.stream
+        # LOGGER.info('url:', url)
+        return url
 
     def build_headers(self):
         """

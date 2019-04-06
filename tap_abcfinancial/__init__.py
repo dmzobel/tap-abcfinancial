@@ -11,9 +11,10 @@ REQUIRED_CONFIG_KEYS = [
 
 STREAMS = [
 	MembersStream,
-    ProspectsStream,
-    ClubsStream,
+	ProspectsStream,
+	ClubsStream,
 ]
+
 
 def main():
 	main_method(
@@ -22,6 +23,7 @@ def main():
 		BaseClient,
 		STREAMS
 	)
+
 
 if __name__ == '__main__':
 	main()

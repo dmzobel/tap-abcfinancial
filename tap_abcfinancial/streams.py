@@ -52,11 +52,12 @@ class ABCStream(Stream):
                          .get(key)
 
     def update_bookmark(self, last_updated, club_id):
-        self.state = self.write_bookmark(self.state,
-                                         self.stream,
-                                         club_id,
-                                         self.stream_metadata.get('replication-key'),
-                                         safe_to_iso8601(last_updated))
+        self.write_bookmark(self.state,
+                            self.stream,
+                            club_id,
+                            self.stream_metadata.get('replication-key'),
+                            safe_to_iso8601(last_updated))
+        singer.write_state(self.state)
 
     def update_start_date_bookmark(self, club_id):
         val = self.get_bookmark(club_id)
@@ -67,6 +68,19 @@ class ABCStream(Stream):
     def update_and_return_bookmark(self, club_id):
         self.update_start_date_bookmark(club_id)
         return self.get_bookmark(club_id)
+
+    @property
+    def is_incremental(self):
+        if self.stream_metadata.get('forced-replication-method') == 'incremental':
+            return True
+        else:
+            return False
+
+    def write_schema(self):
+        singer.write_schema(
+            self.catalog.stream,
+            self.catalog.schema.to_dict(),
+            key_properties=self.stream_metadata.get('table-key-properties', []))
 
 
 class MembersStream(ABCStream):
