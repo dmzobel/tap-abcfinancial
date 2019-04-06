@@ -52,11 +52,6 @@ class ABCExecutor(TapExecutor):
 
         # need to call each club ID individually
         for club_id in self.client.config['club_ids']:
-            LOGGER.info('stream:')
-            LOGGER.info(stream)
-            LOGGER.info('club_id:')
-            LOGGER.info(club_id)
-
             last_updated = format_last_updated_for_request(
                 stream.update_and_return_bookmark(club_id),
                 self.replication_key_format
@@ -150,9 +145,7 @@ class ABCExecutor(TapExecutor):
                 )
 
     def generate_api_url(self, stream, club_id):
-        url = self.url + club_id + '/' + stream.stream
-        # LOGGER.info('url:', url)
-        return url
+        return self.url + club_id + '/' + stream.stream
 
     def build_headers(self):
         """
