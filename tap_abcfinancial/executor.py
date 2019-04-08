@@ -180,7 +180,7 @@ class ABCExecutor(TapExecutor):
         }
 
     def update_for_next_call(self, res, request_config, stream):
-        if int(res.json()['status']['count']) in (0,1):
+        if int(res.json()['status']['count']) < 5000:
             return {
                 "url": self.url,
                 "headers": request_config['headers'],
