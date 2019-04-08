@@ -1,4 +1,5 @@
-from tap_kit import main_method, BaseClient
+from tap_kit import main_method
+from .client import ABCClient
 from .streams import MembersStream, ProspectsStream, ClubsStream
 from .executor import ABCExecutor
 
@@ -20,7 +21,7 @@ def main():
 	main_method(
 		REQUIRED_CONFIG_KEYS,
 		ABCExecutor,
-		BaseClient,
+		ABCClient,
 		STREAMS
 	)
 

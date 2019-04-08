@@ -17,4 +17,4 @@ ABC Financial API: https://abcfinancial.3scale.net/docs
 
 #### Sync mode:
 
-`tap-abcfinancial --config tap_config.json --p catalog.json > test.out`
+`tap-abcfinancial --config tap_config.json -p catalog.json -s state.json`
