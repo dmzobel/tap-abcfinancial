@@ -1,9 +1,13 @@
 import singer
 import backoff
 
-from tap_kit import BaseClient, RateLimitException
+from tap_kit import BaseClient
 
 LOGGER = singer.get_logger()
+
+
+class RateLimitException(Exception):
+    pass
 
 
 class ABCClient(BaseClient):

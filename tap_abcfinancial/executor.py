@@ -79,6 +79,10 @@ class ABCExecutor(TapExecutor):
                 ))
                 records = res.json().get(stream.stream, [])
 
+                if not isinstance(records, list):
+                    # subsequent methods are expecting a list
+                    records = [records]
+
                 # for endpoints that do not provide club_id
                 if stream.stream in streams_to_hydrate:
                     records = self.hydrate_record_with_club_id(records, club_id)
@@ -122,8 +126,7 @@ class ABCExecutor(TapExecutor):
                 ))
 
                 if stream.stream == 'clubs':
-                    # there's only 1 record per call, so the key is 'club',
-                    # not 'clubs'
+                    # there's only 1 record per call, so the key is 'club', not 'clubs'
                     records = res.json().get('club')
                 else:
                     records = res.json().get(stream.stream, [])
