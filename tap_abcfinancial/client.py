@@ -22,7 +22,7 @@ class ABCClient(BaseClient):
         with singer.metrics.Timer('request_duration', {}) as timer:
             response = self.requests_method(method, request_config, body)
 
-        if response.status_code in [401, 429, 503]:
+        if response.status_code in [401, 429, 500, 503]:
             raise RateLimitException()
 
         response.raise_for_status()
