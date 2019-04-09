@@ -5,6 +5,18 @@ import singer
 LOGGER = singer.get_logger()
 
 
+_META_FIELDS = {
+    'table-key-properties': 'key_properties',
+    'forced-replication-method': 'replication_method',
+    'valid-replication-keys': 'valid_replication_keys',
+    'replication-key': 'replication_key',
+    'selected-by-default': 'selected_by_default',
+    'incremental-search-key': 'incremental_search_key',
+    'api-path': 'api_path',
+    'response-key': 'response_key',
+}
+
+
 class ABCStream(Stream):
     """
     methods to track state for each individual ABC Financial club
@@ -82,13 +94,24 @@ class ABCStream(Stream):
             self.catalog.schema.to_dict(),
             key_properties=self.stream_metadata.get('table-key-properties', []))
 
+    def build_base_metadata(self, metadata):
+        for field in _META_FIELDS:
+            if self.meta_fields.get(_META_FIELDS[field]) is not None:
+                self.write_base_metadata(
+                    metadata, field, self.meta_fields[_META_FIELDS[field]]
+                )
+
+        self.write_base_metadata(metadata, 'inclusion', 'available')
+        self.write_base_metadata(metadata, 'schema-name', self.stream)
+
 
 class MembersStream(ABCStream):
-
     stream = 'members'
 
     meta_fields = dict(
         key_properties=['memberId'],
+        api_path='/members',
+        response_key='members',
         replication_method='incremental',
         replication_key='last_updated',
         incremental_search_key='lastModifiedTimestampRange',
@@ -318,6 +341,8 @@ class ProspectsStream(ABCStream):
 
     meta_fields = dict(
         key_properties=['prospectId'],
+        api_path='/prospects',
+        response_key='prospects',
         replication_method='incremental',
         replication_key='last_updated',
         incremental_search_key='lastCheckInTimestampRange',
@@ -450,6 +475,8 @@ class ClubsStream(ABCStream):
 
     meta_fields = dict(
         key_properties=['id'],
+        api_path='/clubs',
+        response_key='club',
         replication_method='full',
         selected_by_default=False
     )
@@ -533,6 +560,39 @@ class ClubsStream(ABCStream):
             },
             "club_id": {
                 "type": ["null", "string"]
+            }
+        }
+    }
+
+
+class CheckInStream(ABCStream):
+    stream = 'check_ins'
+
+    meta_fields = dict(
+        key_properties=['memberId'],
+        api_path='/members/checkins/summaries',
+        response_key='members',
+        replication_method='incremental',
+        replication_key='last_updated',
+        incremental_search_key='checkInTimestampRange',
+        selected_by_default=False
+    )
+
+    schema = {
+        "properties": {
+            "memberId": {
+                "type": ["null", "string"]
+            },
+            "links": {
+                "type": ["null", "string"]
+            },
+            "checkInCounts": {
+                "properties": {
+                    "checkInCount": {
+                        "type": ["null", "array"]
+                    }
+                },
+                "type": ["null", "object"]
             }
         }
     }

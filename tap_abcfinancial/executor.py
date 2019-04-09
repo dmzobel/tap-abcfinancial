@@ -77,7 +77,7 @@ class ABCExecutor(TapExecutor):
                     i=res.json()['request']['page'],
                     c=club_id
                 ))
-                records = res.json().get(stream.stream, [])
+                records = res.json().get(stream.stream_metadata['response-key'])
 
                 if not isinstance(records, list):
                     # subsequent methods are expecting a list
@@ -125,11 +125,7 @@ class ABCExecutor(TapExecutor):
                     c=club_id
                 ))
 
-                if stream.stream == 'clubs':
-                    # there's only 1 record per call, so the key is 'club', not 'clubs'
-                    records = res.json().get('club')
-                else:
-                    records = res.json().get(stream.stream, [])
+                records = res.json().get(stream.stream_metadata['response-key'])
 
                 if not isinstance(records, list):
                     # subsequent methods are expecting a list
@@ -148,7 +144,7 @@ class ABCExecutor(TapExecutor):
                 )
 
     def generate_api_url(self, stream, club_id):
-        return self.url + club_id + '/' + stream.stream
+        return self.url + club_id + stream.stream_metadata['api-path']
 
     def build_headers(self):
         """
