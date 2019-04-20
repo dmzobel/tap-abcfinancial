@@ -566,12 +566,12 @@ class ClubsStream(ABCStream):
 
 
 class CheckInStream(ABCStream):
-    stream = 'check_ins'
+    stream = 'checkins'
 
     meta_fields = dict(
-        key_properties=['memberId'],
-        api_path='/members/checkins/summaries',
-        response_key='members',
+        key_properties=['checkInId'],
+        api_path='/clubs/checkins/details',
+        response_key='checkins',
         replication_method='incremental',
         replication_key='last_updated',
         incremental_search_key='checkInTimestampRange',
@@ -580,16 +580,22 @@ class CheckInStream(ABCStream):
 
     schema = {
         "properties": {
-            "memberId": {
+            "checkInId": {
                 "type": ["null", "string"]
             },
-            "links": {
+            "checkInTimestamp": {
                 "type": ["null", "string"]
             },
-            "checkInCounts": {
+            "stationName": {
+                "type": ["null", "string"]
+            },
+            "member": {
                 "properties": {
-                    "checkInCount": {
-                        "type": ["null", "array"]
+                    "memberId": {
+                        "type": ["null", "string"]
+                    },
+                    "homeClub": {
+                        "type": ["null", "string"]
                     }
                 },
                 "type": ["null", "object"]
