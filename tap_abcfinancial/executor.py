@@ -145,13 +145,16 @@ class ABCExecutor(TapExecutor):
             self.replication_key_format
         )
 
+        # the checkins endpoint only extracts in 31 day windows, so
+        # `new_bookmark` needs to account for that
         if stream.stream == 'checkins' and \
                 last_updated == '1970-01-01 00:00:00':
             last_updated = pendulum.datetime(2015, 1, 1)
-            new_bookmark = last_updated.add(days=30)
+            new_bookmark = last_updated.add(days=31)
 
         elif stream.stream == 'checkins':
-            new_bookmark = last_updated.add(days=30)
+            dt = pendulum.parse(last_updated)
+            new_bookmark = dt.add(days=31)
 
         else:
             new_bookmark = str(pendulum.now('UTC'))
