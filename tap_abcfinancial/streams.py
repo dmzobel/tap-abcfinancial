@@ -599,6 +599,9 @@ class CheckInStream(ABCStream):
                     }
                 },
                 "type": ["null", "object"]
+            },
+            "club_id": {
+                "type": ["null", "string"]
             }
         }
     }
