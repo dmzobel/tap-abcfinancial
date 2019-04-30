@@ -113,13 +113,14 @@ class ABCExecutor(TapExecutor):
 
             records = res.json().get(stream.stream_metadata['response-key'])
 
-            if not isinstance(records, list):
-                # subsequent methods are expecting a list
-                records = [records]
+            if records:
+                if not isinstance(records, list):
+                    # subsequent methods are expecting a list
+                    records = [records]
 
-            # for endpoints that do not provide club_id
-            if stream.stream in streams_to_hydrate:
-                records = self.hydrate_record_with_club_id(records, club_id)
+                # for endpoints that do not provide club_id
+                if stream.stream in streams_to_hydrate:
+                    records = self.hydrate_record_with_club_id(records, club_id)
 
             transform_write_and_count(stream, records)
 
