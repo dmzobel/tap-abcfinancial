@@ -90,7 +90,7 @@ class ABCExecutor(TapExecutor):
                 'run': True
             }
 
-            LOGGER.info("Extracting {s} for club {c}".format(s=stream, 
+            LOGGER.info("Extracting {s} for club {c}".format(s=stream,
                                                              c=club_id))
 
             self.call_stream(stream, club_id, request_config)
@@ -245,4 +245,4 @@ class ABCExecutor(TapExecutor):
         return records
 
 
-streams_to_hydrate = ['prospects', 'clubs']
+streams_to_hydrate = ['prospects', 'clubs', 'checkins']
