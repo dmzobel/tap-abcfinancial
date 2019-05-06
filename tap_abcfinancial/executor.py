@@ -247,4 +247,4 @@ class ABCExecutor(TapExecutor):
         return records
 
 
-streams_to_hydrate = ['prospects', 'clubs', 'checkins']
+streams_to_hydrate = ['prospects', 'clubs', 'checkins', 'recurringservices']

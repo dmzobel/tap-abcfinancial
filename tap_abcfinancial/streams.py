@@ -620,3 +620,133 @@ class CheckInStream(ABCStream):
             }
         }
     }
+
+
+class RecurringServicesStream(ABCStream):
+    stream = 'recurringservices'
+
+    meta_fields = dict(
+        key_properties=['recurringServiceId'],
+        api_path='/members/recurringservices',
+        response_key='recurringServices',
+        replication_method='incremental',
+        replication_key='last_updated',
+        incremental_search_key='lastModifiedTimestampRange',
+        selected_by_default=False
+    )
+
+    schema = {
+        "recurringServiceId": {
+            "type": ["null", "string"]
+        },
+        "createTimestamp": {
+            "type": ["null", "string"]
+        },
+        "memberId": {
+            "type": ["null", "string"]
+        },
+        "agreementNumber": {
+            "type": ["null", "string"]
+        },
+        "memberFirstName": {
+            "type": ["null", "string"]
+        },
+        "memberLastName": {
+            "type": ["null", "string"]
+        },
+        "salesPersonId": {
+            "type": ["null", "string"]
+        },
+        "salesPersonFirstName": {
+            "type": ["null", "string"]
+        },
+        "salesPersonLastName": {
+            "type": ["null", "string"]
+        },
+        "serviceEmployeeId": {
+            "type": ["null", "string"]
+        },
+        "serviceEmployeeFirstName": {
+            "type": ["null", "string"]
+        },
+        "serviceEmployeeLastName": {
+            "type": ["null", "string"]
+        },
+        "campaignName": {
+            "type": ["null", "string"]
+        },
+        "recurringServicePlanId": {
+            "type": ["null", "string"]
+        },
+        "recurringServiceStatus": {
+            "type": ["null", "string"]
+        },
+        "recurringServiceSubStatus": {
+            "type": ["null", "string"]
+        },
+        "recurringTypeDesc": {
+            "type": ["null", "string"]
+        },
+        "numberBilled": {
+            "type": ["null", "string"]
+        },
+        "totalPeriods": {
+            "type": ["null", "string"]
+        },
+        "invoiceTotal": {
+            "type": ["null", "string"]
+        },
+        "frequency": {
+            "type": ["null", "string"]
+        },
+        "reorderQuantity": {
+            "type": ["null", "string"]
+        },
+        "serviceItem": {
+            "type": ["null", "string"]
+        },
+        "unitPrice": {
+            "type": ["null", "string"]
+        },
+        "autoRenew": {
+            "type": ["null", "string"]
+        },
+        "purchasedClub": {
+            "type": ["null", "string"]
+        },
+        "commissionsEmployeeId": {
+            "type": ["null", "string"]
+        },
+        "recurringServiceDates": {
+            "properties": {
+                "saleDate": {
+                    "type": ["null", "string"]
+                },
+                "startFreezeDate": {
+                    "type": ["null", "string"]
+                },
+                "endFreezeDate": {
+                    "type": ["null", "string"]
+                },
+                "firstBillingDate": {
+                    "type": ["null", "string"]
+                },
+                "nextBillingDate": {
+                    "type": ["null", "string"]
+                },
+                "finalBillingDate": {
+                    "type": ["null", "string"]
+                },
+                "inactiveDate": {
+                    "type": ["null", "string"]
+                },
+                "deactivateReason": {
+                    "type": ["null", "string"]
+                },
+                "lastModifiedTimestamp": {
+                    "type": ["null", "string"]
+                }
+            },
+            "type": ["null", "object"]
+        }
+    }
