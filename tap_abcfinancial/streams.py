@@ -318,6 +318,21 @@ class MembersStream(ABCStream):
                     "nextBillingDate": {
                         "type": ["null", "string"]
                     },
+                    "convertedDate": {
+                        "type": ["null", "string"]
+                    },
+                    "expirationDate": {
+                        "type": ["null", "string"]
+                    },
+                    "renewalDate": {
+                        "type": ["null", "string"]
+                    },
+                    "lastRenewalDate": {
+                        "type": ["null", "string"]
+                    },
+                    "lastRewriteDate": {
+                        "type": ["null", "string"]
+                    },
                     "primaryBillingAccountHolder": {
                         "properties": {
                             "firstName": {
