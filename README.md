@@ -13,8 +13,8 @@ ABC Financial API: https://abcfinancial.3scale.net/docs
 
 #### Discover mode:
 
-`tap-abcfinancial --config tap_config.json --discover > catalog.json`
+`tap-abcfinancial --config config.json --discover > catalog.json`
 
 #### Sync mode:
 
-`tap-abcfinancial --config tap_config.json -p catalog.json -s state.json`
+`tap-abcfinancial --config config.json -p catalog.json -s state.json`

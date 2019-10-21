@@ -158,21 +158,22 @@ class ABCExecutor(TapExecutor):
             "app_key": self.api_key,
         }
 
-    def get_new_bookmark(self, stream, last_updated):
+    @staticmethod
+    def get_new_bookmark(stream, last_updated):
         # the checkins endpoint only extracts in 31 day windows, so
         # `new_bookmark` needs to account for that
         if stream.stream == 'checkins':
             dt = pendulum.parse(last_updated) \
                  if last_updated != '1970-01-01 00:00:00' \
                  else pendulum.datetime(2015, 1, 1)  # min lookback date is January 1, 2015
-
             new_bookmark = min(dt.add(days=31), pendulum.now('UTC'))
         else:
             new_bookmark = str(pendulum.now('UTC'))
 
         return str(new_bookmark)
 
-    def format_last_updated(self, last_updated):
+    @staticmethod
+    def format_last_updated(last_updated):
         """
         Args:
             last_updated(str): datetime string in ISO 8601 format
@@ -216,7 +217,8 @@ class ABCExecutor(TapExecutor):
                 "run": True
             }
 
-    def build_next_params(self, params):
+    @staticmethod
+    def build_next_params(params):
         if params.get('page'):
             params['page'] += 1
         return params
@@ -233,7 +235,8 @@ class ABCExecutor(TapExecutor):
             "run": True
         }
 
-    def hydrate_record_with_club_id(self, records, club_id):
+    @staticmethod
+    def hydrate_record_with_club_id(records, club_id):
         """
         Args:
             records (array [JSON]):
