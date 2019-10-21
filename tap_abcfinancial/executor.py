@@ -196,8 +196,9 @@ class ABCExecutor(TapExecutor):
             # since the checkins stream only extracts in 31 day increments,
             # we don't want it to stop until it's reached the present day.
             # therefore, we need to handle it separately
+            cutoff_dt = pendulum.now('UTC').subtract(hours=12).start_of('day')
             if stream.stream == 'checkins' and \
-                    pendulum.parse(last_updated) < pendulum.today('UTC'):
+                    pendulum.parse(last_updated) < cutoff_dt:
                 return self.get_next_config_for_checkins(stream, last_updated, request_config)
             else:
                 request_config['run'] = False
