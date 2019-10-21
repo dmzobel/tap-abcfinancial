@@ -67,8 +67,7 @@ class ABCExecutor(TapExecutor):
                 s=stream, c=club_id, d=last_updated, n=new_bookmark)
             )
 
-            final_bookmark = self.call_stream(stream, club_id, request_config,
-                                              new_bookmark)
+            final_bookmark = self.call_stream(stream, club_id, request_config, new_bookmark)
 
             LOGGER.info('Setting {s} last updated for club {c} to {b}'.format(
                 s=stream,
@@ -95,7 +94,7 @@ class ABCExecutor(TapExecutor):
 
             self.call_stream(stream, club_id, request_config)
 
-    def call_stream(self, stream, club_id, request_config, last_updated=None):
+    def call_stream(self, stream, club_id, request_config, curr_upper_bound=None):
         while request_config['run']:
             res = self.client.make_request(request_config)
 
@@ -120,30 +119,24 @@ class ABCExecutor(TapExecutor):
                 records = [records]
 
             # for endpoints that do not provide club_id
-            if stream.stream in streams_to_hydrate:
+            if stream.stream in STREAMS_TO_HYDRATE:
                 records = self.hydrate_record_with_club_id(records, club_id)
 
             transform_write_and_count(stream, records)
 
-            # TODO: this is hacky and should be rethought
-            # since the checkins bookmark could be changing along the way (see
-            # self.get_new_bookmark), this is how we keep track of it
-            if stream.stream == 'checkins':
-                request_dates = res.json()['request'][stream.stream_metadata[stream.filter_key]]
-                last_updated = request_dates.split(',')[1]
-
-            LOGGER.info('{s} bookmark for club {c} is set at: {b}'.format(
-                s=stream.stream, c=club_id, b=last_updated)
-            )
-
-            request_config = self.update_for_next_call(
+            request_config, curr_upper_bound = self.update_for_next_call(
                 int(res.json()['status']['count']),
                 request_config,
                 stream,
-                last_updated
+                curr_upper_bound
             )
 
-        return last_updated
+            if stream.is_incremental:
+                LOGGER.info('{s} bookmark for club {c} is currently {b}'.format(
+                    s=stream.stream, c=club_id, b=curr_upper_bound)
+                )
+
+        return curr_upper_bound
 
     def generate_api_url(self, stream, club_id):
         return self.url + club_id + stream.stream_metadata['api-path']
@@ -163,10 +156,11 @@ class ABCExecutor(TapExecutor):
         # the checkins endpoint only extracts in 31 day windows, so
         # `new_bookmark` needs to account for that
         if stream.stream == 'checkins':
-            dt = pendulum.parse(last_updated) \
-                 if last_updated != '1970-01-01 00:00:00' \
-                 else pendulum.datetime(2015, 1, 1)  # min lookback date is January 1, 2015
-            new_bookmark = min(dt.add(days=31), pendulum.now('UTC'))
+            last_updated = pendulum.parse(last_updated)
+            # for checkins, API does not appear to return any records < 7 hours old
+            # add 12 hour delay, so we're not requesting records that are not yet available
+            upper_bound = pendulum.now('UTC').subtract(hours=12)
+            new_bookmark = min(last_updated.add(days=31), upper_bound)
         else:
             new_bookmark = str(pendulum.now('UTC'))
 
@@ -177,7 +171,7 @@ class ABCExecutor(TapExecutor):
         """
         Args:
             last_updated(str): datetime string in ISO 8601 format
-        Return:
+        Returns:
             datetime string in the following format: 'YYYY-MM-DD hh:mm:ss.nnnnnn'
             (necessary format for ABC Financial API)
         """
@@ -194,28 +188,26 @@ class ABCExecutor(TapExecutor):
 
     def update_for_next_call(self, num_records_received, request_config,
                              stream, last_updated=None):
+        """
+        Returns:
+            tuple (request_config (dict), last_updated datetime (str))
+        """
         if num_records_received < 5000:
             # since the checkins stream only extracts in 31 day increments,
             # we don't want it to stop until it's reached the present day.
             # therefore, we need to handle it separately
             if stream.stream == 'checkins' and \
                     pendulum.parse(last_updated) < pendulum.today('UTC'):
-                return self.get_next_config_for_checkins(stream, last_updated,
-                                                         request_config)
+                return self.get_next_config_for_checkins(stream, last_updated, request_config)
             else:
-                return {
-                    "url": self.url,
-                    "headers": request_config['headers'],
-                    "params": request_config['params'],
-                    "run": False
-                }
+                request_config['run'] = False
+                return request_config, last_updated
         else:
-            return {
-                "url": request_config['url'],
-                "headers": request_config['headers'],
-                "params": self.build_next_params(request_config['params']),
-                "run": True
-            }
+            new_config = {"url": request_config['url'],
+                          "headers": request_config['headers'],
+                          "params": self.build_next_params(request_config['params']),
+                          "run": True}
+            return new_config, last_updated
 
     @staticmethod
     def build_next_params(params):
@@ -223,17 +215,19 @@ class ABCExecutor(TapExecutor):
             params['page'] += 1
         return params
 
-    def get_next_config_for_checkins(self, stream, last_updated,
-                                     request_config):
-
+    def get_next_config_for_checkins(self, stream, last_updated, request_config):
+        """
+        Returns:
+             tuple (request_config (dict), last_updated datetime (str))
+        """
         new_bookmark = self.get_new_bookmark(stream, last_updated)
-
-        return {
+        new_config = {
             "url": request_config['url'],
             "headers": request_config['headers'],
             "params": self.build_initial_params(stream, last_updated, new_bookmark),
             "run": True
         }
+        return new_config, new_bookmark
 
     @staticmethod
     def hydrate_record_with_club_id(records, club_id):
@@ -250,4 +244,4 @@ class ABCExecutor(TapExecutor):
         return records
 
 
-streams_to_hydrate = ['prospects', 'clubs', 'checkins']
+STREAMS_TO_HYDRATE = {'prospects', 'clubs', 'checkins'}
