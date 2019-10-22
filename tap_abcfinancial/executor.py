@@ -95,6 +95,10 @@ class ABCExecutor(TapExecutor):
             self.call_stream(stream, club_id, request_config)
 
     def call_stream(self, stream, club_id, request_config, curr_upper_bound=None):
+        """
+        Utility method shared by incremental and full streams; handles API calls and
+        record writes
+        """
         while request_config['run']:
             res = self.client.make_request(request_config)
 
@@ -124,17 +128,17 @@ class ABCExecutor(TapExecutor):
 
             transform_write_and_count(stream, records)
 
+            if stream.is_incremental:
+                LOGGER.info('{s} bookmark for club {c} is currently {b}'.format(
+                    s=stream.stream, c=club_id, b=curr_upper_bound)
+                )
+
             request_config, curr_upper_bound = self.update_for_next_call(
                 int(res.json()['status']['count']),
                 request_config,
                 stream,
                 curr_upper_bound
             )
-
-            if stream.is_incremental:
-                LOGGER.info('{s} bookmark for club {c} is currently {b}'.format(
-                    s=stream.stream, c=club_id, b=curr_upper_bound)
-                )
 
         return curr_upper_bound
 
@@ -153,8 +157,8 @@ class ABCExecutor(TapExecutor):
 
     @staticmethod
     def get_new_bookmark(stream, last_updated):
-        # the checkins endpoint only extracts in 31 day windows, so
-        # `new_bookmark` needs to account for that
+        # the checkins endpoint only extracts in 31 day windows, so `new_bookmark`
+        # needs to account for that
         if stream.stream == 'checkins':
             last_updated = pendulum.parse(last_updated)
             # for checkins, API does not appear to return any records < 7 hours old
@@ -189,6 +193,8 @@ class ABCExecutor(TapExecutor):
     def update_for_next_call(self, num_records_received, request_config,
                              stream, last_updated=None):
         """
+        We return `last_updated` so that it can be easily referenced in other functions
+        without having to string-parse the time range provided in the request config
         Returns:
             tuple (request_config (dict), last_updated datetime (str))
         """
