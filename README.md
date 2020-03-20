@@ -25,8 +25,10 @@ Currently capable of extracting 4 streams:
 
 #### Discover mode:
 
-`tap-abcfinancial --config config.json --discover > catalog.json`
+`tap-abcfinancial -c config.json --discover > catalog.json`
 
 #### Sync mode:
 
-`tap-abcfinancial --config config.json -p catalog.json -s state.json`
+`tap-abcfinancial -c config.json -p catalog.json -s state.json`
+
+*Note:* The `-s` parameter is optional
