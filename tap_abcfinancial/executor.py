@@ -157,14 +157,14 @@ class ABCExecutor(TapExecutor):
 
     @staticmethod
     def get_new_bookmark(stream, last_updated):
-        # the checkins endpoint only extracts in 31 day windows, so `new_bookmark`
-        # needs to account for that
-        if stream.stream == 'checkins':
+        # some streams (checkins, events) only extract in 30 day windows, so
+        # `new_bookmark` needs to account for that
+        if stream.stream in ('checkins', 'events'):
             last_updated = pendulum.parse(last_updated)
             # for checkins, API does not appear to return any records < 7 hours old
             # add 12 hour delay, so we're not requesting records that are not yet available
             upper_bound = pendulum.now('UTC').subtract(hours=12)
-            new_bookmark = min(last_updated.add(days=31), upper_bound)
+            new_bookmark = min(last_updated.add(days=30), upper_bound)
         else:
             new_bookmark = str(pendulum.now('UTC'))
 
@@ -199,13 +199,15 @@ class ABCExecutor(TapExecutor):
             tuple (request_config (dict), last_updated datetime (str))
         """
         if num_records_received < 5000:
-            # since the checkins stream only extracts in 31 day increments,
-            # we don't want it to stop until it's reached the present day.
-            # therefore, we need to handle it separately
+            # some streams (checkins, events) only extract in 30 day increments,
+            # we don't want them to stop until they've reached the present day.
+            # therefore, we need to handle them differently than "normal" streams
             cutoff_dt = pendulum.now('UTC').subtract(hours=12).start_of('day')
-            if stream.stream == 'checkins' and \
+            if stream.stream in ('checkins', 'events') and \
                     pendulum.parse(last_updated) < cutoff_dt:
-                return self.get_next_config_for_checkins(stream, last_updated, request_config)
+                return self.get_next_config_for_30day_streams(stream,
+                                                              last_updated,
+                                                              request_config)
             else:
                 request_config['run'] = False
                 return request_config, last_updated
@@ -222,7 +224,7 @@ class ABCExecutor(TapExecutor):
             params['page'] += 1
         return params
 
-    def get_next_config_for_checkins(self, stream, last_updated, request_config):
+    def get_next_config_for_30day_streams(self, stream, last_updated, request_config):
         """
         Returns:
              tuple (request_config (dict), last_updated datetime (str))
@@ -251,4 +253,4 @@ class ABCExecutor(TapExecutor):
         return records
 
 
-STREAMS_TO_HYDRATE = {'prospects', 'clubs', 'checkins'}
+STREAMS_TO_HYDRATE = {'prospects', 'clubs', 'checkins', 'events'}

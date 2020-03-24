@@ -631,7 +631,7 @@ class EventsStream(ABCStream):
         response_key='events',
         replication_method='incremental',
         replication_key='last_updated',
-        incremental_search_key='modifiedTimestamp',
+        incremental_search_key='eventModifiedDateRange',
         selected_by_default=False
     )
 
