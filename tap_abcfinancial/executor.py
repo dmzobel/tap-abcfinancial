@@ -186,7 +186,7 @@ class ABCExecutor(TapExecutor):
         date_range = '{p},{c}'.format(p=self.format_last_updated(last_updated),
                                       c=self.format_last_updated(new_bookmark))
         return {
-            stream.stream_metadata[stream.filter_key]: date_range,
+            stream.stream_metadata['incremental-search-key']: date_range,
             'page': 1
         }
 
