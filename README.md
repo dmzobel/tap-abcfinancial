@@ -16,6 +16,8 @@ Currently capable of extracting 4 streams:
   requires custom handling when back-filling data over a large time range
 - *Prospects*:
   - Incremental stream
+- *Events*:
+  - Incremental stream
 
 ## Setup
 
