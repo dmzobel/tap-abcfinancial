@@ -1,6 +1,6 @@
 from tap_kit import main_method
 from .client import ABCClient
-from .streams import MembersStream, ProspectsStream, ClubsStream, CheckInStream
+from .streams import MembersStream, ProspectsStream, ClubsStream, CheckInStream, EventsStream
 from .executor import ABCExecutor
 
 
@@ -15,6 +15,7 @@ STREAMS = [
 	ProspectsStream,
 	ClubsStream,
 	CheckInStream,
+	EventsStream,
 ]
 
 
