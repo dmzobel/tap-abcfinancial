@@ -620,3 +620,102 @@ class CheckInStream(ABCStream):
             }
         }
     }
+
+
+class EventsStream(ABCStream):
+    stream = 'events'
+
+    meta_fields = dict(
+        key_properties=['id'],
+        api_path='/calendars/events',
+        response_key='events',
+        replication_method='incremental',
+        replication_key='last_updated',
+        incremental_search_key='modifiedTimestamp',
+        selected_by_default=False
+    )
+
+    schema = {
+        "properties": {
+            "eventId": {
+                "type": ["null", "string"]
+            },
+            "eventTypeId": {
+                "type": ["null", "string"]
+            },
+            "eventName": {
+                "type": ["null", "string"]
+            },
+            "category": {
+                "type": ["null", "string"]
+            },
+            "isAvailableOnline": {
+                "type": ["null", "string"]
+            },
+            "eventTimestamp": {
+                "type": ["null", "string"],
+                "format": "date-time"},
+            "status": {
+                "type": ["null", "string"]
+            },
+            "duration": {
+                "type": ["null", "string"]
+            },
+            "allowCancelBefore": {
+                        "type": ["null", "string"],
+                        "format": "date-time"},
+            "startBookingTime": {
+                        "type": ["null", "string"],
+                        "format": "date-time"},
+            "stopBookingTime": {
+                        "type": ["null", "string"],
+                        "format": "date-time"},
+            "maxAttendees": {
+                "type": ["null", "string"] 
+            },
+            "comments": {
+                "type": ["null", "string"]
+            },
+            "employeeId": {
+                "type": ["null", "string"]
+            },
+            "employeeName": {
+                "type": ["null", "string"]
+            },
+            "createdTimestamp":  {
+                "type": ["null", "string"],
+                "format": "date-time"},
+            "modifiedTimestamp":  {
+                "type": ["null", "string"],
+                "format": "date-time"},
+            "locationId": {
+                "type": ["null", "string"]
+            },
+            "locationName": {
+                "type": ["null", "string"]
+            },
+            "earningsCode": {
+                "type": ["null", "string"]
+            },
+            "enrollAfterStartMinutes": {
+                "type": ["null", "string"]
+            },
+            "eventTrainingLevel": {
+                "properties": {
+                    "levelId": {
+                        "type": ["null", "string"]
+                    },
+                    "levelName": {
+                        "type": ["null", "string"]
+                    },
+                    "isFree": {
+                        "type": ["null", "string"]
+                    }
+                },
+                "type": ["null", "object"]
+            },
+            "members": {
+                "type": ["null", "array"] 
+            }
+        }
+    }
