@@ -137,6 +137,9 @@ class MembersStream(ABCStream):
                     "addressLine1": {
                         "type": ["null", "string"]
                     },
+                    "addressLine2": {
+                        "type": ["null", "string"]
+                    },
                     "city": {
                         "type": ["null", "string"]
                     },
