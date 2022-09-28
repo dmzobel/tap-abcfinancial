@@ -722,3 +722,29 @@ class EventsStream(ABCStream):
             }
         }
     }
+
+
+class MembersGroupsStream(ABCStream):
+    stream = 'members_groups'
+
+    meta_fields = dict(
+        key_properties=['id'],
+        api_path='/members/groups',
+        response_key='groups',
+        replication_method='full',
+        selected_by_default=False
+    )
+
+    schema = {
+        "properties": {
+            "id": {
+                "type": ["null", "string"]
+            },
+            "name": {
+                "type": ["null", "string"]
+            },
+            "status": {
+                "type": ["null", "string"]
+            }
+        }
+    }
