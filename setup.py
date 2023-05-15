@@ -12,10 +12,10 @@ setup(
     install_requires=[
         "singer-python==5.2.0",
         "pendulum==1.2.0",
-        "tap-kit @ git+https://github.com/dmzobel/tap-kit.git@master"
+        "tap-kit @ git+https://github.com/dmzobel/tap-kit.git@main"
     ],
     dependency_links=[
-        "https://github.com/dmzobel/tap-kit/tarball/master#egg=tap-kit-0.1.1",
+        "https://github.com/dmzobel/tap-kit/tarball/main#egg=tap-kit-0.1.1",
     ],
     entry_points="""
     [console_scripts]
